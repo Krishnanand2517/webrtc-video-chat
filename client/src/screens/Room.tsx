@@ -11,6 +11,14 @@ const RoomScreen = () => {
   const [myStream, setMyStream] = useState<MediaStream>();
   const [remoteStream, setRemoteStream] = useState<MediaStream>();
 
+  const sendStreams = useCallback(() => {
+    if (myStream) {
+      for (const track of myStream.getTracks()) {
+        peer.peer.addTrack(track, myStream);
+      }
+    }
+  }, [myStream]);
+
   const handleUserJoined = useCallback(
     ({ email, id }: { email: string; id: string }) => {
       console.log(`User ${email} joined the room!`);
@@ -59,13 +67,9 @@ const RoomScreen = () => {
       await peer.setLocalDescription(ans);
       console.log("Call Accepted");
 
-      if (myStream) {
-        for (const track of myStream.getTracks()) {
-          peer.peer.addTrack(track, myStream);
-        }
-      }
+      sendStreams();
     },
-    [myStream]
+    [sendStreams]
   );
 
   const handleRemoteTrack = useCallback((ev: RTCTrackEvent) => {
@@ -142,6 +146,7 @@ const RoomScreen = () => {
       <h1>RoomScreen</h1>
 
       <h4>{remoteSocketId ? "Connected" : "No one in room"}</h4>
+      {myStream && <button onClick={sendStreams}>Send Stream</button>}
       {remoteSocketId && <button onClick={handleCallUser}>CALL</button>}
 
       {myStream && (
@@ -162,7 +167,6 @@ const RoomScreen = () => {
           <h3>Remote Stream</h3>
           <ReactPlayer
             url={remoteStream}
-            muted
             playing
             width="480px"
             height="360px"
