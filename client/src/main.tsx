@@ -5,6 +5,7 @@ import { SocketProvider } from "./context/SocketProvider.tsx";
 import "./index.css";
 import App from "./App.tsx";
 import LobbyScreen from "./screens/Lobby.tsx";
+import RoomScreen from "./screens/Room.tsx";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +15,10 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <LobbyScreen />,
+      },
+      {
+        path: "/room/:roomId",
+        element: <RoomScreen />,
       },
     ],
   },
