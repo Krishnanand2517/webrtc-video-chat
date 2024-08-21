@@ -36,6 +36,18 @@ io.on("connection", (socket) => {
     io.to(to).emit("call:accepted", { ans });
   });
 
+  socket.on("peer:nego:needed", (data) => {
+    const { offer, to } = data;
+
+    io.to(to).emit("peer:nego:needed", { from: socket.id, offer });
+  });
+
+  socket.on("peer:nego:done", (data) => {
+    const { to, ans } = data;
+
+    io.to(to).emit("peer:nego:final", { ans });
+  });
+
   socket.on("disconnect", () => {
     console.log("Disconnected:", socket.id);
   });

@@ -9,6 +9,7 @@ const RoomScreen = () => {
 
   const [remoteSocketId, setRemoteSocketId] = useState<string>();
   const [myStream, setMyStream] = useState<MediaStream>();
+  const [remoteStream, setRemoteStream] = useState<MediaStream>();
 
   const handleUserJoined = useCallback(
     ({ email, id }: { email: string; id: string }) => {
@@ -57,6 +58,42 @@ const RoomScreen = () => {
     async ({ ans }: { ans: RTCSessionDescriptionInit }) => {
       await peer.setLocalDescription(ans);
       console.log("Call Accepted");
+
+      if (myStream) {
+        for (const track of myStream.getTracks()) {
+          peer.peer.addTrack(track, myStream);
+        }
+      }
+    },
+    [myStream]
+  );
+
+  const handleRemoteTrack = useCallback((ev: RTCTrackEvent) => {
+    setRemoteStream(ev.streams[0]);
+  }, []);
+
+  const handleNegoNeeded = useCallback(async () => {
+    const offer = await peer.getOffer();
+    socket?.emit("peer:nego:needed", { offer, to: remoteSocketId });
+  }, [socket, remoteSocketId]);
+
+  const handleNegoIncoming = useCallback(
+    async ({
+      from,
+      offer,
+    }: {
+      from: string;
+      offer: RTCSessionDescriptionInit;
+    }) => {
+      const ans = await peer.getAnswer(offer);
+      socket?.emit("peer:nego:done", { to: from, ans });
+    },
+    [socket]
+  );
+
+  const handleNegoFinal = useCallback(
+    async ({ ans }: { ans: RTCSessionDescriptionInit }) => {
+      await peer.setLocalDescription(ans);
     },
     []
   );
@@ -65,13 +102,40 @@ const RoomScreen = () => {
     socket?.on("user:joined", handleUserJoined);
     socket?.on("incoming:call", handleIncomingCall);
     socket?.on("call:accepted", handleCallAccepted);
+    socket?.on("peer:nego:needed", handleNegoIncoming);
+    socket?.on("peer:nego:final", handleNegoFinal);
 
     return () => {
       socket?.off("user:joined", handleUserJoined);
       socket?.off("incoming:call", handleIncomingCall);
       socket?.off("call:accepted", handleCallAccepted);
+      socket?.off("peer:nego:needed", handleNegoIncoming);
+      socket?.off("peer:nego:final", handleNegoFinal);
     };
-  }, [socket, handleUserJoined, handleIncomingCall, handleCallAccepted]);
+  }, [
+    socket,
+    handleUserJoined,
+    handleIncomingCall,
+    handleCallAccepted,
+    handleNegoIncoming,
+    handleNegoFinal,
+  ]);
+
+  useEffect(() => {
+    peer.peer.addEventListener("track", handleRemoteTrack);
+
+    return () => {
+      peer.peer.removeEventListener("track", handleRemoteTrack);
+    };
+  }, [handleRemoteTrack]);
+
+  useEffect(() => {
+    peer.peer.addEventListener("negotiationneeded", handleNegoNeeded);
+
+    return () => {
+      peer.peer.removeEventListener("negotiationneeded", handleNegoNeeded);
+    };
+  }, [handleNegoNeeded]);
 
   return (
     <div>
@@ -85,6 +149,19 @@ const RoomScreen = () => {
           <h3>My Stream</h3>
           <ReactPlayer
             url={myStream}
+            muted
+            playing
+            width="480px"
+            height="360px"
+          />
+        </>
+      )}
+
+      {remoteStream && (
+        <>
+          <h3>Remote Stream</h3>
+          <ReactPlayer
+            url={remoteStream}
             muted
             playing
             width="480px"
