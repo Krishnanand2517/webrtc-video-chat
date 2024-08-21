@@ -24,6 +24,18 @@ io.on("connection", (socket) => {
     io.to(socket.id).emit("room:join", { room });
   });
 
+  socket.on("user:call", (data) => {
+    const { to, offer } = data;
+
+    io.to(to).emit("incoming:call", { from: socket.id, offer });
+  });
+
+  socket.on("call:accepted", (data) => {
+    const { to, ans } = data;
+
+    io.to(to).emit("call:accepted", { ans });
+  });
+
   socket.on("disconnect", () => {
     console.log("Disconnected:", socket.id);
   });
