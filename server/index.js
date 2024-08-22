@@ -45,7 +45,13 @@ io.on("connection", (socket) => {
   socket.on("peer:nego:done", (data) => {
     const { to, ans } = data;
 
-    io.to(to).emit("peer:nego:final", { ans });
+    io.to(to).emit("peer:nego:final", { from: socket.id, ans });
+  });
+
+  socket.on("final:send:streams", (data) => {
+    const { to } = data;
+
+    io.to(to).emit("final:send:streams");
   });
 
   socket.on("disconnect", () => {

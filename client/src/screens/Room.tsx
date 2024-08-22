@@ -96,11 +96,16 @@ const RoomScreen = () => {
   );
 
   const handleNegoFinal = useCallback(
-    async ({ ans }: { ans: RTCSessionDescriptionInit }) => {
+    async ({ from, ans }: { from: string; ans: RTCSessionDescriptionInit }) => {
       await peer.setLocalDescription(ans);
+      socket?.emit("final:send:streams", { to: from });
     },
-    []
+    [socket]
   );
+
+  const handleFinalSendStreams = useCallback(() => {
+    sendStreams();
+  }, [sendStreams]);
 
   useEffect(() => {
     socket?.on("user:joined", handleUserJoined);
@@ -108,6 +113,7 @@ const RoomScreen = () => {
     socket?.on("call:accepted", handleCallAccepted);
     socket?.on("peer:nego:needed", handleNegoIncoming);
     socket?.on("peer:nego:final", handleNegoFinal);
+    socket?.on("final:send:streams", handleFinalSendStreams);
 
     return () => {
       socket?.off("user:joined", handleUserJoined);
@@ -115,6 +121,7 @@ const RoomScreen = () => {
       socket?.off("call:accepted", handleCallAccepted);
       socket?.off("peer:nego:needed", handleNegoIncoming);
       socket?.off("peer:nego:final", handleNegoFinal);
+      socket?.off("final:send:streams", handleFinalSendStreams);
     };
   }, [
     socket,
@@ -123,6 +130,7 @@ const RoomScreen = () => {
     handleCallAccepted,
     handleNegoIncoming,
     handleNegoFinal,
+    handleFinalSendStreams,
   ]);
 
   useEffect(() => {
