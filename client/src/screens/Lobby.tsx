@@ -30,25 +30,36 @@ const LobbyScreen = () => {
   }, [socket, handleRoomJoin]);
 
   return (
-    <div>
-      <h1>LobbyScreen</h1>
+    <div className="py-8 flex flex-col gap-24 justify-center items-center">
+      <h1 className="font-black text-4xl lg:text-6xl bg-gradient-to-r from-red-700 to-blue-600 text-transparent bg-clip-text">
+        We Talk
+      </h1>
 
-      <form onSubmit={handleSubmitForm}>
+      <form
+        onSubmit={handleSubmitForm}
+        className="p-6 lg:p-10 flex flex-col gap-6 lg:gap-8 border-2 rounded-lg"
+      >
         <input
-          type="email"
+          type="text"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter email"
+          placeholder="Enter Username"
+          className="w-52 lg:w-80 text-sm lg:text-base bg-transparent border border-white/80 rounded-md p-2"
+          required
         />
-        <br />
+
         <input
           type="text"
           value={room}
           onChange={(e) => setRoom(e.target.value)}
-          placeholder="Enter room id"
+          placeholder="Enter Room ID"
+          className="w-52 lg:w-80 text-sm lg:text-base bg-transparent border border-white/80 rounded-md p-2"
+          required
         />
-        <br />
-        <button>Join</button>
+
+        <button className="px-6 py-2 rounded-lg bg-white/90 text-slate-900 hover:bg-white/40 hover:text-white transition-colors">
+          Join
+        </button>
       </form>
     </div>
   );

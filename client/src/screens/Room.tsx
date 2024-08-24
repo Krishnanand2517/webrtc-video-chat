@@ -3,9 +3,12 @@ import ReactPlayer from "react-player";
 
 import { useSocket } from "../hooks/useSocket";
 import peer from "../service/peer";
+import { useParams } from "react-router-dom";
 
 const RoomScreen = () => {
   const socket = useSocket();
+
+  const { roomId } = useParams();
 
   const [remoteSocketId, setRemoteSocketId] = useState<string>();
   const [myStream, setMyStream] = useState<MediaStream>();
@@ -150,37 +153,56 @@ const RoomScreen = () => {
   }, [handleNegoNeeded]);
 
   return (
-    <div>
-      <h1>RoomScreen</h1>
+    <div className="flex flex-col gap-6 justify-center items-center py-6 px-10">
+      <h2 className="text-lg">Room ID: {roomId}</h2>
 
-      <h4>{remoteSocketId ? "Connected" : "No one in room"}</h4>
-      {myStream && <button onClick={sendStreams}>Send Stream</button>}
-      {remoteSocketId && <button onClick={handleCallUser}>CALL</button>}
+      <h4 className="text-xl font-bold">
+        {remoteSocketId ? "Connected" : "No one in room"}
+      </h4>
 
-      {myStream && (
-        <>
-          <h3>My Stream</h3>
-          <ReactPlayer
-            url={myStream}
-            muted
-            playing
-            width="480px"
-            height="360px"
-          />
-        </>
+      {/* {myStream && <button onClick={sendStreams}>Send Stream</button>} */}
+
+      {remoteSocketId && !(myStream && remoteStream) && (
+        <button
+          className="px-6 py-2 rounded-md bg-green-500 hover:bg-green-700 transition-colors"
+          onClick={handleCallUser}
+        >
+          CALL
+        </button>
       )}
 
-      {remoteStream && (
-        <>
-          <h3>Remote Stream</h3>
-          <ReactPlayer
-            url={remoteStream}
-            playing
-            width="480px"
-            height="360px"
-          />
-        </>
-      )}
+      <div className="flex flex-col lg:flex-row gap-10">
+        {myStream && (
+          <div>
+            <h3 className="text-2xl font-bold text-center">My Stream</h3>
+            <div className="w-[300px] lg:w-full max-w-md my-4 rounded-lg overflow-clip">
+              <ReactPlayer
+                url={myStream}
+                muted
+                playing
+                width="100%"
+                height="auto"
+              />
+            </div>
+          </div>
+        )}
+
+        {remoteStream && (
+          <div>
+            <h3 className="text-2xl font-bold text-center text-green-500">
+              Remote Stream
+            </h3>
+            <div className="w-[300px] lg:w-full max-w-md my-4 rounded-lg overflow-clip">
+              <ReactPlayer
+                url={remoteStream}
+                playing
+                width="100%"
+                height="auto"
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
