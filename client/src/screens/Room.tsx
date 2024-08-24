@@ -16,6 +16,10 @@ const RoomScreen = () => {
   const [myStream, setMyStream] = useState<MediaStream>();
   const [remoteStream, setRemoteStream] = useState<MediaStream>();
 
+  const [isIncomingCall, setIsIncomingCall] = useState(false);
+  const [incomingOffer, setIncomingOffer] =
+    useState<RTCSessionDescriptionInit>();
+
   const sendStreams = useCallback(() => {
     if (myStream) {
       for (const track of myStream.getTracks()) {
@@ -59,18 +63,27 @@ const RoomScreen = () => {
       console.log("Incoming Call from", email, from, offer);
       setRemoteEmail(email);
       setRemoteSocketId(from);
+      setIncomingOffer(offer);
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: true,
-      });
-      setMyStream(stream);
-
-      const ans = await peer.getAnswer(offer);
-      socket?.emit("call:accepted", { to: from, ans });
+      setIsIncomingCall(true);
     },
-    [socket]
+    []
   );
+
+  const acceptCall = useCallback(async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+    setMyStream(stream);
+
+    const ans = incomingOffer && (await peer.getAnswer(incomingOffer));
+
+    socket?.emit("call:accepted", { to: remoteSocketId, ans });
+
+    setIsIncomingCall(false);
+    setIncomingOffer(undefined);
+  }, [socket, remoteSocketId, incomingOffer]);
 
   const handleCallAccepted = useCallback(
     async ({ ans }: { ans: RTCSessionDescriptionInit }) => {
@@ -167,8 +180,6 @@ const RoomScreen = () => {
         {remoteSocketId ? "Connected" : "No one in room"}
       </h4>
 
-      {/* {myStream && <button onClick={sendStreams}>Send Stream</button>} */}
-
       {remoteSocketId && !(myStream && remoteStream) && (
         <button
           className="px-6 py-2 rounded-md bg-green-500 hover:bg-green-700 transition-colors"
@@ -178,10 +189,19 @@ const RoomScreen = () => {
         </button>
       )}
 
+      {isIncomingCall && (
+        <button
+          onClick={acceptCall}
+          className="px-6 py-2 rounded-md bg-green-500 hover:bg-green-700 transition-colors"
+        >
+          Accept Call from {remoteEmail}
+        </button>
+      )}
+
       <div className="flex flex-col lg:flex-row gap-10">
         {myStream && (
           <div>
-            <h3 className="text-2xl font-bold text-center">My Stream</h3>
+            <h3 className="text-2xl font-bold text-center">You</h3>
             <div className="w-[300px] lg:w-full max-w-md my-4 rounded-lg overflow-clip">
               <ReactPlayer
                 url={myStream}
