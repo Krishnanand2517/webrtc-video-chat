@@ -26,8 +26,9 @@ io.on("connection", (socket) => {
 
   socket.on("user:call", (data) => {
     const { to, offer } = data;
+    const email = socketIdToEmailMap.get(socket.id);
 
-    io.to(to).emit("incoming:call", { from: socket.id, offer });
+    io.to(to).emit("incoming:call", { email, from: socket.id, offer });
   });
 
   socket.on("call:accepted", (data) => {

@@ -11,6 +11,8 @@ const RoomScreen = () => {
   const { roomId } = useParams();
 
   const [remoteSocketId, setRemoteSocketId] = useState<string>();
+  const [remoteEmail, setRemoteEmail] = useState("");
+
   const [myStream, setMyStream] = useState<MediaStream>();
   const [remoteStream, setRemoteStream] = useState<MediaStream>();
 
@@ -25,6 +27,8 @@ const RoomScreen = () => {
   const handleUserJoined = useCallback(
     ({ email, id }: { email: string; id: string }) => {
       console.log(`User ${email} joined the room!`);
+
+      setRemoteEmail(email);
       setRemoteSocketId(id);
     },
     []
@@ -44,13 +48,16 @@ const RoomScreen = () => {
 
   const handleIncomingCall = useCallback(
     async ({
+      email,
       from,
       offer,
     }: {
+      email: string;
       from: string;
       offer: RTCSessionDescriptionInit;
     }) => {
-      console.log("Incoming Call", from, offer);
+      console.log("Incoming Call from", email, from, offer);
+      setRemoteEmail(email);
       setRemoteSocketId(from);
 
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -190,7 +197,7 @@ const RoomScreen = () => {
         {remoteStream && (
           <div>
             <h3 className="text-2xl font-bold text-center text-green-500">
-              Remote Stream
+              {remoteEmail}
             </h3>
             <div className="w-[300px] lg:w-full max-w-md my-4 rounded-lg overflow-clip">
               <ReactPlayer
