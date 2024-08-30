@@ -5,7 +5,7 @@ const SocketContext = createContext<Socket | null>(null);
 
 export const SocketProvider = ({ children }: { children: ReactNode }) => {
   const socket = useMemo(
-    () => io("http://webrtc-videochat-server.ap-south-1.elasticbeanstalk.com"),
+    () => io("https://interim-aila-krishnanand-yadav-b377ed1a.koyeb.app"),
     []
   );
 
