@@ -198,11 +198,11 @@ const RoomScreen = () => {
         </button>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-10">
+      <div className="flex flex-col-reverse lg:flex-row gap-10">
         {myStream && (
           <div>
             <h3 className="text-2xl font-bold text-center">You</h3>
-            <div className="w-[300px] lg:w-full max-w-md my-4 rounded-lg overflow-clip">
+            <div className="w-[300px] lg:w-10/12 max-w-md my-4 rounded-lg overflow-clip">
               <ReactPlayer
                 url={myStream}
                 muted
