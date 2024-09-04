@@ -57,6 +57,16 @@ io.on("connection", (socket) => {
     io.to(to).emit("final:send:streams");
   });
 
+  socket.on("message:send", (data) => {
+    const { messageData } = data;
+    const newMessage = {
+      ...messageData,
+      author: socketIdToEmailMap.get(socket.id),
+    };
+
+    io.to(messageData.to).emit("message:receive", { messageData: newMessage });
+  });
+
   socket.on("disconnect", () => {
     console.log("Disconnected:", socket.id);
   });
