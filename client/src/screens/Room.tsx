@@ -142,7 +142,9 @@ const RoomScreen = () => {
     sendStreams();
   }, [sendStreams]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+
     if (!remoteSocketId) return;
 
     const currentDate = new Date();
@@ -310,7 +312,7 @@ const RoomScreen = () => {
           </div>
 
           <form
-            onSubmit={() => handleSendMessage}
+            onSubmit={handleSendMessage}
             className="flex justify-between gap-4"
           >
             <input
