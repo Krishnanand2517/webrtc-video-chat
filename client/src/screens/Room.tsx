@@ -309,7 +309,10 @@ const RoomScreen = () => {
             ))}
           </div>
 
-          <div className="flex justify-between gap-4">
+          <form
+            onSubmit={() => handleSendMessage}
+            className="flex justify-between gap-4"
+          >
             <input
               type="text"
               placeholder="Your message..."
@@ -318,12 +321,12 @@ const RoomScreen = () => {
               onChange={(e) => setCurrentMessage(e.target.value)}
             />
             <button
-              onClick={handleSendMessage}
+              type="submit"
               className="py-2 px-4 text-sm font-bold rounded-md bg-green-500 hover:bg-green-700 transition-colors"
             >
               SEND
             </button>
-          </div>
+          </form>
         </div>
       )}
     </div>
