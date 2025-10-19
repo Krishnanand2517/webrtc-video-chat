@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import ReactPlayer from "react-player";
 
 import { useSocket } from "../hooks/useSocket";
 import peer from "../service/peer";
-import { useParams } from "react-router-dom";
 
 interface MessageData {
   text: string;
@@ -16,6 +16,8 @@ const RoomScreen = () => {
   const socket = useSocket();
 
   const { roomId } = useParams();
+
+  const [isVisible, setIsVisible] = useState(false);
 
   const [remoteSocketId, setRemoteSocketId] = useState<string>();
   const [remoteEmail, setRemoteEmail] = useState("");
@@ -165,6 +167,10 @@ const RoomScreen = () => {
   );
 
   useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  useEffect(() => {
     socket?.on("user:joined", handleUserJoined);
     socket?.on("incoming:call", handleIncomingCall);
     socket?.on("call:accepted", handleCallAccepted);
@@ -210,7 +216,11 @@ const RoomScreen = () => {
   }, [handleNegoNeeded]);
 
   return (
-    <div className="flex flex-col gap-6 justify-center items-center py-6 px-10">
+    <div
+      className={`flex flex-col gap-6 justify-center items-center py-6 px-10 duration-1000 delay-300 ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+      }`}
+    >
       <h2 className="text-lg">Room ID: {roomId}</h2>
 
       <h4 className="text-xl font-bold">
@@ -219,7 +229,7 @@ const RoomScreen = () => {
 
       {remoteSocketId && !(myStream && remoteStream) && (
         <button
-          className="px-6 py-2 rounded-md bg-green-500 hover:bg-green-700 transition-colors"
+          className="px-6 py-2 font-semibold rounded-md bg-green-500 hover:bg-green-700 transition-colors"
           onClick={handleCallUser}
         >
           CALL
@@ -229,7 +239,7 @@ const RoomScreen = () => {
       {isIncomingCall && (
         <button
           onClick={acceptCall}
-          className="px-6 py-2 rounded-md bg-green-500 hover:bg-green-700 transition-colors"
+          className="px-6 py-2 font-semibold rounded-md bg-green-500 hover:bg-green-700 transition-colors"
         >
           Accept Call from {remoteEmail}
         </button>
@@ -272,7 +282,7 @@ const RoomScreen = () => {
       {remoteStream && (
         <div className="flex flex-col items-center gap-6 w-[300px] lg:w-3/4 lg:max-w-lg text-sm lg:text-base">
           {/* MESSAGES */}
-          <div className="flex flex-col gap-4 p-4 border border-white rounded-md w-full">
+          <div className="w-full flex flex-col gap-4 p-4 bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-sm border border-white/10 rounded-2xl hover:border-fuchsia-500/30 transition-all duration-500">
             {messagesList.map((message, idx) => (
               <div
                 key={idx}
@@ -303,7 +313,7 @@ const RoomScreen = () => {
             <input
               type="text"
               placeholder="Your message..."
-              className="text-sm lg:text-base bg-transparent border border-white/80 rounded-md p-2"
+              className="text-sm lg:text-base bg-white/5 border border-white/20 rounded-xl px-6 py-2 text-white placeholder-white/40 focus:border-fuchsia-500/50 focus:bg-white/10 focus:outline-none transition-all duration-300"
               value={currentMessage}
               onChange={(e) => setCurrentMessage(e.target.value)}
             />
